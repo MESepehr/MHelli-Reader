@@ -1,5 +1,8 @@
 *.so
 *.so.*
+*.dylib
+*.dylib.*
+.qmake.stash
 *.o
 Makefile
 /tags

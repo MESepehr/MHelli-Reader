@@ -15,9 +15,6 @@
 bool operator<(const QPoint &, const QPoint &);
 
 class Object {
-private:
-	mutable bool done;
-
 protected:
     std::map<QPoint, unsigned char> mPoints;
 	mutable QPoint mCenter;

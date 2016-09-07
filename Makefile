@@ -35,7 +35,7 @@ COMPRESS      = gzip -9f
 DISTNAME      = reader1.0.0
 DISTDIR = /Users/sassanharadji/Projects/MHelli/mhelli/mhelli-reader/.tmp/reader1.0.0
 LINK          = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
-LFLAGS        = -headerpad_max_install_names -stdlib=libc++ -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk -mmacosx-version-min=10.8 -Wl,-rpath,/Users/sassanharadji/Qt/5.7/clang_64/lib -single_module -dynamiclib -compatibility_version	1.0 -current_version	1.0.0 -install_name	libreader.1.dylib
+LFLAGS        = -headerpad_max_install_names -stdlib=libc++ -Wl,-rpath,./mhelli-reader -Wl,-syslibroot,/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk -mmacosx-version-min=10.8 -Wl,-rpath,/Users/sassanharadji/Qt/5.7/clang_64/lib -single_module -dynamiclib -compatibility_version	1.0 -current_version	1.0.0 -install_name	libreader.1.dylib
 LIBS          = $(SUBLIBS) -F/Users/sassanharadji/Qt/5.7/clang_64/lib -framework QtGui -framework QtCore -framework DiskArbitration -framework IOKit -framework OpenGL -framework AGL 
 AR            = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ar cq
 RANLIB        = /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ranlib -s
