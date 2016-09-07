@@ -8,8 +8,7 @@
 #include <QJsonDocument>
 #include <QByteArray>
 
-#include "Object.h"
-#include <iostream>
+#include "object.h"
 #include <cmath>
 #include <map>
 #include <set>
