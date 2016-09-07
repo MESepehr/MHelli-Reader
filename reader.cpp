@@ -227,7 +227,6 @@ bool readBarcode() {
     for (int i = 1; i < 31; i++) {
         for (int j = 0; j < 3; j++) {
             QPointF localBase(b[1] - w * i * I + h * j * J);
-            int counter = 0;
             for (float x = -w / 2; x <= w / 2; x++) {
                 for (float y = -h / 2; y <= h / 2; y++) {
                     QPoint point((localBase + x * I + y * J).toPoint());
@@ -281,14 +280,14 @@ bool readAnswers() {
             if (var > 31) {
                 for (int k = 0; k < 4; k++) {
                     QPointF localBase(base + i * c * I + j * h * J + k * w * I);
-                    int counter = 0;
+                    unsigned counter = 0;
                     for (int x = 0; x < 25; x++) {
                         for (int y = 0; y < 10; y++) {
                             QPoint point((localBase + x * I + y * J).toPoint());
                             counter += imageOptions[point.x()][point.y()];
                         }
                     }
-                    counter = qMax(0, counter);
+                    counter = qMax(0u, counter);
                     if (counter > (25 * 10) * 255 * 1 / 8 and counter / (25 * 10) > mid * 4 / 3) {
                         dd |= 1 << k;
                     }
