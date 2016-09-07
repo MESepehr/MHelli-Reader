@@ -1,3 +1,5 @@
 *.so
+*.so.*
 *.o
+Makefile
 /tags
