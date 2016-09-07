@@ -6,7 +6,7 @@
  *      Author: root
  */
 
-#include "Object.h"
+#include "object.h"
 #include <QDebug>
 #include <cmath>
 
