@@ -302,8 +302,8 @@ bool readAnswers() {
     return true;
 }
 
-char *run(uchar *data, int size) {
-    QImage mImage = QImage::fromData(data, size);
+char *_run(char *data, int size) {
+    QImage mImage = QImage::fromData((uchar *)data, size);
     bool answersStatus = false;
 
     unsigned long long registrationID = 0;
@@ -533,10 +533,10 @@ char *run(uchar *data, int size) {
     QString json(QJsonDocument(result).toJson(QJsonDocument::Compact));
     char *d = new char[json.count() + 1];
     qstrncpy(d, json.toStdString().c_str(), json.count() + 1);
-    qWarning() << (qulonglong)d;
     return d;
 }
 
 extern "C" {
-    char *_run(uchar *image, int size) {return run(image, size);}
+    char *run(char *image, int size) {return _run(image, size);}
+    void freeString(char *ptr) {delete ptr;}
 }
