@@ -466,7 +466,6 @@ char *_run(char *data, int size) {
     }
 
     // emit newStage(4, "Processing Barcode...", sheet.scaledToWidth(800));
-    sheet.save("./out.jpg");
 
     if (barcode) {
         bool A[2][46];
