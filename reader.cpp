@@ -414,13 +414,6 @@ char *_run(char *data, int size) {
     }
 #endif
 
-    if (!barcode) {
-        QString json("{\"error\":\"barcode\"}");
-        char *d = new char[json.count() + 1];
-        qstrncpy(d, json.toStdString().c_str(), json.count() + 1);
-        return d;
-    }
-
     answersStatus = readAnswers();
 #ifdef _LEVEL_4
     {
@@ -444,13 +437,6 @@ char *_run(char *data, int size) {
         p.end();
     }
 #endif
-
-    if (!answersStatus) {
-        QString json("{\"error\":\"answers\"}");
-        char *d = new char[json.count() + 1];
-        qstrncpy(d, json.toStdString().c_str(), json.count() + 1);
-        return d;
-    }
 
     if (barcode) {
         bool A[2][46];
@@ -504,13 +490,16 @@ char *_run(char *data, int size) {
             barcode = 0;
     }
 
-    QJsonArray A;
-    for (int i = 0; i < 120; i++) {
-        A.append(answers[i]);
-    }
     QJsonObject result;
-    result["answers"] = A;
-    result["id"] = QString::number(registrationID);
+    if (answersStatus) {
+        QJsonArray A;
+        for (int i = 0; i < 120; i++) {
+            A.append(answers[i]);
+        }
+        result["answers"] = A;
+    }
+    if (registrationID)
+        result["id"] = QString::number(registrationID);
 
     QString json(QJsonDocument(result).toJson(QJsonDocument::Compact));
     char *d = new char[json.count() + 1];
