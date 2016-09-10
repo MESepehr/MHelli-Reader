@@ -22,10 +22,10 @@ using namespace std;
 #define INTERVAL 80
 
 //#define _LEVEL_0
-#define _LEVEL_1
-#define _LEVEL_2
-#define _LEVEL_3
-#define _LEVEL_4
+// #define _LEVEL_1
+// #define _LEVEL_2
+// #define _LEVEL_3
+// #define _LEVEL_4
 // #define _LEVEL_5
 
 
@@ -314,8 +314,6 @@ char *_run(char *data, int size) {
     }
     sheet = mImage.scaledToWidth(800, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32);
 
-    // emit newStage(0, "Remove noises by color filters...", mImage);
-
     long long int MM = 0;
     for (int i = 0; i < sheet.width(); i++)
         for (int j = 0; j < sheet.height(); j++)
@@ -343,8 +341,6 @@ char *_run(char *data, int size) {
                     p.drawPoint(i, j);
     }
 #endif
-
-    // emit newStage(1, "Detecting flags...", sheet.scaledToWidth(800));
 
     bool flags = findFlags();
 
@@ -392,13 +388,11 @@ char *_run(char *data, int size) {
 #endif
 
     if (!flags) {
-        // error("Corrupted paper", QString::fromUtf8(
-        //             "مشکل در خواندن علائم صفحه.") + QString::number(err));
-        qWarning() << "E1";
-        return NULL;
+        QString json("{\"error\":\"flags\"}");
+        char *d = new char[json.count() + 1];
+        qstrncpy(d, json.toStdString().c_str(), json.count() + 1);
+        return d;
     }
-
-    // emit newStage(2, "Reading barcode...", sheet.scaledToWidth(800));
 
     barcode = readBarcode();
 #ifdef _LEVEL_3
@@ -421,16 +415,12 @@ char *_run(char *data, int size) {
     }
 #endif
 
-    // emit newStage(3, "Reading answers...", sheet.scaledToWidth(800));
     if (!barcode) {
-        // error("Corrupted paper", QString::fromUtf8(
-        //             "مشکل در خواندن علائم بارکد.") + QString::number(err));
-        qWarning() << "E2";
-        return NULL;
+        QString json("{\"error\":\"barcode\"}");
+        char *d = new char[json.count() + 1];
+        qstrncpy(d, json.toStdString().c_str(), json.count() + 1);
+        return d;
     }
-
-
-    // emit newStage(3, "Reading answers...", sheet.scaledToWidth(800));
 
     answersStatus = readAnswers();
 #ifdef _LEVEL_4
@@ -457,13 +447,11 @@ char *_run(char *data, int size) {
 #endif
 
     if (!answersStatus) {
-        // error("Corrupted paper", QString::fromUtf8(
-        //             "مشکل در خواندن علائم بارکد.") + QString::number(err));
-        qWarning() << "E3";
-        return NULL;
+        QString json("{\"error\":\"answers\"}");
+        char *d = new char[json.count() + 1];
+        qstrncpy(d, json.toStdString().c_str(), json.count() + 1);
+        return d;
     }
-
-    // emit newStage(4, "Processing Barcode...", sheet.scaledToWidth(800));
 
     if (barcode) {
         bool A[2][46];
