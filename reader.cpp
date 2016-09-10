@@ -305,7 +305,6 @@ char *_run(char *data, int size) {
     bool answersStatus = false;
 
     unsigned long long registrationID = 0;
-    int err = -1;
     bool barcode = false;
     if (mImage.width() > mImage.height()) {
         QTransform t;
@@ -486,7 +485,6 @@ char *_run(char *data, int size) {
                 continue;
             if (A[0][i] != A[1][i]) {
                 if (toChange0 && toChange1) {
-                    err = 200 + i;
                     barcode = false;
                 }
                 else if (toChange0)
@@ -494,7 +492,6 @@ char *_run(char *data, int size) {
                 else if (toChange1)
                     bid += A[0][i] * (1llu << j);
                 else {
-                    err = 200 + i;
                     barcode = false;
                 }
             }
