@@ -485,9 +485,10 @@ char *_run(char *data, int size) {
                 bid += A[0][i] * (1llu << j);
             j++;
         }
-        registrationID = bid;
+        if (barcode)
+            registrationID = bid;
         if (registrationID == 0)
-            barcode = 0;
+            barcode = false;
     }
 
     QJsonObject result;
