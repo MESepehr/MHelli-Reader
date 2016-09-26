@@ -22,10 +22,10 @@ using namespace std;
 #define INTERVAL 80
 
 //#define _LEVEL_0
-#define _LEVEL_1
-#define _LEVEL_2
-#define _LEVEL_3
-#define _LEVEL_4
+// #define _LEVEL_1
+// #define _LEVEL_2
+// #define _LEVEL_3
+// #define _LEVEL_4
 // #define _LEVEL_5
 
 
@@ -486,7 +486,6 @@ char *_run(char *data, int size) {
                 bid += A[0][i] * (1llu << j);
             j++;
         }
-        qWarning() << barcode;
         if (barcode)
             registrationID = bid;
         if (registrationID == 0)
