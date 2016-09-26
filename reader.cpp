@@ -193,9 +193,9 @@ bool findFlags() {
     O = f3->center();
 
     QPointF base[4] = {QPointF(O + 63 * I + 110 * J),
-        QPointF(O + 63 * I + 110 * J + 30 * 21.9 * I),
+        QPointF(O + 63 * I + 110 * J + 30 * 22.1 * I),
         QPointF(O + 63 * I + 110 * J + 3 * 18 * J),
-        QPointF(O + 63 * I + 110 * J + 30 * 21.9 * I + 3 * 18 * J)};
+        QPointF(O + 63 * I + 110 * J + 30 * 22.1 * I + 3 * 18 * J)};
     float l[4] = {-1, -1, -1, -1};
     foreach (Object *o, objects) {
         for (int i = 0; i < 4; i++) {
@@ -373,9 +373,9 @@ char *_run(char *data, int size) {
 
         p.setBrush(QBrush(QColor(255, 0, 0, 0)));
         p.drawEllipse(QPointF(O + 63 * I + 110 * J), 5, 5);
-        p.drawEllipse(QPointF(O + 63 * I + 110 * J + 30 * 22 * I), 5, 5);
+        p.drawEllipse(QPointF(O + 63 * I + 110 * J + 30 * 22.1 * I), 5, 5);
         p.drawEllipse(QPointF(O + 63 * I + 110 * J + 3 * 18 * J), 5, 5);
-        p.drawEllipse(QPointF(O + 63 * I + 110 * J + 30 * 22 * I + 3 * 18 * J), 5, 5);
+        p.drawEllipse(QPointF(O + 63 * I + 110 * J + 30 * 22.1 * I + 3 * 18 * J), 5, 5);
 
         p.setBrush(QBrush(QColor(0, 255, 255, 127)));
         p.drawEllipse(b[0], 10, 10);
