@@ -7,3 +7,5 @@ SOURCES += object.cpp \
 HEADERS += object.h
 
 QMAKE_LFLAGS += -Wl,-rpath,'./mhelli-reader'
+
+QMAKE_MAC_SDK = macosx10.12

@@ -22,10 +22,10 @@ using namespace std;
 #define INTERVAL 80
 
 //#define _LEVEL_0
-// #define _LEVEL_1
-// #define _LEVEL_2
-// #define _LEVEL_3
-// #define _LEVEL_4
+#define _LEVEL_1
+#define _LEVEL_2
+#define _LEVEL_3
+#define _LEVEL_4
 // #define _LEVEL_5
 
 
@@ -193,9 +193,9 @@ bool findFlags() {
     O = f3->center();
 
     QPointF base[4] = {QPointF(O + 63 * I + 110 * J),
-        QPointF(O + 63 * I + 110 * J + 30 * 21.8 * I),
+        QPointF(O + 63 * I + 110 * J + 30 * 21.9 * I),
         QPointF(O + 63 * I + 110 * J + 3 * 18 * J),
-        QPointF(O + 63 * I + 110 * J + 30 * 21.8 * I + 3 * 18 * J)};
+        QPointF(O + 63 * I + 110 * J + 30 * 21.9 * I + 3 * 18 * J)};
     float l[4] = {-1, -1, -1, -1};
     foreach (Object *o, objects) {
         for (int i = 0; i < 4; i++) {
@@ -385,6 +385,7 @@ char *_run(char *data, int size) {
         p.end();
     }
 #endif
+    sheet.save("./out.jpg");
 
     if (!flags) {
         QString json("{\"error\":\"flags\"}");
@@ -485,6 +486,7 @@ char *_run(char *data, int size) {
                 bid += A[0][i] * (1llu << j);
             j++;
         }
+        qWarning() << barcode;
         if (barcode)
             registrationID = bid;
         if (registrationID == 0)
