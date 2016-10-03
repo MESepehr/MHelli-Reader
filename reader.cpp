@@ -385,7 +385,7 @@ char *_run(char *data, int size) {
         p.end();
     }
 #endif
-    sheet.save("./out.jpg");
+    // sheet.save("./out.jpg");
 
     if (!flags) {
         QString json("{\"error\":\"flags\"}");
