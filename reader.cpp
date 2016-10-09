@@ -327,7 +327,7 @@ char *_run(char *data, int size) {
             int r = qRed(sheet.pixel(i, j));
             int g = qGreen(sheet.pixel(i, j));
             int b = qBlue(sheet.pixel(i, j));
-            image[i][j] = image[i][j] = (r + g + b) / 3 < MM / 2 ? 255 : 0;
+            image[i][j] = (r + g) / 2 < MM / 4 * 3 and abs(r - b) + abs(r - g) < 80 ? 255 - qGray(sheet.pixel(i, j)) : 0;
             imageOptions[i][j] = (r + g) / 2 < (MM * 3 / 2) and abs(r - b) + abs(r - g) < 100 ? 255 - qGray(sheet.pixel(i, j)) : 0;
         }
 
