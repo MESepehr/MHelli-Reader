@@ -192,10 +192,10 @@ bool findFlags() {
     J = verticalBorder / 1000;
     O = f3->center();
 
-    QPointF base[4] = {QPointF(O + 63 * I + 110 * J),
-        QPointF(O + 63 * I + 110 * J + 30 * 22.1 * I),
-        QPointF(O + 63 * I + 110 * J + 3 * 18 * J),
-        QPointF(O + 63 * I + 110 * J + 30 * 22.1 * I + 3 * 18 * J)};
+    QPointF base[4] = {QPointF(O + 57 * I + 110 * J),
+        QPointF(O + 57 * I + 110 * J + 30 * 22.3 * I),
+        QPointF(O + 57 * I + 110 * J + 3 * 18 * J),
+        QPointF(O + 57 * I + 110 * J + 30 * 22.3 * I + 3 * 18 * J)};
     float l[4] = {-1, -1, -1, -1};
     foreach (Object *o, objects) {
         for (int i = 0; i < 4; i++) {
@@ -327,7 +327,7 @@ char *_run(char *data, int size) {
             int r = qRed(sheet.pixel(i, j));
             int g = qGreen(sheet.pixel(i, j));
             int b = qBlue(sheet.pixel(i, j));
-            image[i][j] = (r + g) / 2 < MM and abs(r - b) + abs(r - g) < 100 ? 255 - qGray(sheet.pixel(i, j)) : 0;
+            image[i][j] = image[i][j] = (r + g + b) / 3 < MM / 2 ? 255 : 0;
             imageOptions[i][j] = (r + g) / 2 < (MM * 3 / 2) and abs(r - b) + abs(r - g) < 100 ? 255 - qGray(sheet.pixel(i, j)) : 0;
         }
 
@@ -372,10 +372,10 @@ char *_run(char *data, int size) {
 
 
         p.setBrush(QBrush(QColor(255, 0, 0, 0)));
-        p.drawEllipse(QPointF(O + 63 * I + 110 * J), 5, 5);
-        p.drawEllipse(QPointF(O + 63 * I + 110 * J + 30 * 22.1 * I), 5, 5);
-        p.drawEllipse(QPointF(O + 63 * I + 110 * J + 3 * 18 * J), 5, 5);
-        p.drawEllipse(QPointF(O + 63 * I + 110 * J + 30 * 22.1 * I + 3 * 18 * J), 5, 5);
+        p.drawEllipse(QPointF(O + 57 * I + 110 * J), 5, 5);
+        p.drawEllipse(QPointF(O + 57 * I + 110 * J + 30 * 22.3 * I), 5, 5);
+        p.drawEllipse(QPointF(O + 57 * I + 110 * J + 3 * 18 * J), 5, 5);
+        p.drawEllipse(QPointF(O + 57 * I + 110 * J + 30 * 22.3 * I + 3 * 18 * J), 5, 5);
 
         p.setBrush(QBrush(QColor(0, 255, 255, 127)));
         p.drawEllipse(b[0], 10, 10);
@@ -467,10 +467,12 @@ char *_run(char *data, int size) {
         }
 
         unsigned long long bid = 0;
+        unsigned diffCounter = 0;
         for (int i = 0, j = 0; i < 45; i++) {
             if (i + 1 == 1 || i + 1 == 2 || i + 1 == 4 || i + 1 == 8 || i + 1 == 16 || i + 1 == 32)
                 continue;
             if (A[0][i] != A[1][i]) {
+                diffCounter++;
                 if (toChange0 && toChange1) {
                     barcode = false;
                 }
@@ -486,6 +488,8 @@ char *_run(char *data, int size) {
                 bid += A[0][i] * (1llu << j);
             j++;
         }
+        if (diffCounter > 7)
+            barcode = false;
         if (barcode)
             registrationID = bid;
         if (registrationID == 0)
@@ -502,6 +506,7 @@ char *_run(char *data, int size) {
     }
     if (registrationID)
         result["id"] = QString::number(registrationID);
+    qWarning() << registrationID;
 
     QString json(QJsonDocument(result).toJson(QJsonDocument::Compact));
     char *d = new char[json.count() + 1];
