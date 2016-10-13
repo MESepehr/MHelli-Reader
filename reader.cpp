@@ -506,7 +506,6 @@ char *_run(char *data, int size) {
     }
     if (registrationID)
         result["id"] = QString::number(registrationID);
-    qWarning() << registrationID;
 
     QString json(QJsonDocument(result).toJson(QJsonDocument::Compact));
     char *d = new char[json.count() + 1];
