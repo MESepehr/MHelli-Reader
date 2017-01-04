@@ -1,3 +1,4 @@
+#include <QtGlobal>
 #include <QVariant>
 #include <QFile>
 #include <QImage>
@@ -7,6 +8,9 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QByteArray>
+#include <QBuffer>
+
+#include <zbar.h>
 
 #include "object.h"
 #include <cmath>
@@ -29,6 +33,7 @@ using namespace std;
 // #define _LEVEL_5
 
 
+QImage qImage;
 bool checked[1200][1200];
 unsigned char image[1200][1200];
 unsigned char imageOptions[1200][1200];
@@ -219,6 +224,18 @@ bool findFlags() {
 }
 
 bool readBarcode() {
+    zbar::ImageScanner scanner;
+    scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 1);
+    QByteArray data;
+    QBuffer buffer(&data);
+    qImage.save(&buffer, "jpeg");
+    qImage.save("/tmp/b.jpg", "jpeg");
+    zbar::Image zImage(qImage.width(), qImage.height(), "JPEG", data.constData(), qImage.width() * qImage.height());
+    zbar::Image zImage2 = zImage.convert(((unsigned long)('Y')) | ((unsigned long)('8') << 8) | ((unsigned long )('0') << 16) | ((unsigned long)('0') << 24));
+    int n = scanner.scan(zImage2);
+    if (n > 0)
+        return QString::fromStdString(zImage2.symbol_begin()->get_data()).toULongLong();
+
     float w = length(b[1] - b[0]) / 31, h = length(b[2] - b[0]) / 2;
     QPointF I = (b[1] - b[0]) / length(b[1] - b[0]);
     QPointF J = (b[2] - b[0]) / length(b[2] - b[0]);
@@ -250,7 +267,58 @@ bool readBarcode() {
             barcodeTable[i - 1 + j * 30] = counter > w * h * mid;
         }
     }
-    return true;
+
+    bool A[2][46];
+    for (int i = 0; i < 45; i++) {
+        A[0][i] = barcodeTable[i];
+        A[1][i] = (barcodeTable + 45)[i];
+    }
+    A[0][45] = A[1][45] = 0;
+    int toChange0 = 0, toChange1 = 0;
+    for (int i = 0; i <= 5; i++) {
+        bool p1 = false, p2 = false;
+        for (int j = 0; j < 45; j++)
+            if ((1 << i) & (j + 1)) {
+                p1 ^= A[0][j];
+                p2 ^= A[1][j];
+            }
+        if (p1)
+            toChange0 += 1 << i;
+        if (p2)
+            toChange1 += 1 << i;
+    }
+    if (toChange0 <= 45 and toChange0 > 0) {
+        A[0][toChange0 - 1] ^= 1;
+    }
+    if (toChange1 <= 45 and toChange1 > 0) {
+        A[1][toChange1 - 1] ^= 1;
+    }
+
+    unsigned long long bid = 0;
+    unsigned diffCounter = 0;
+    for (int i = 0, j = 0; i < 45; i++) {
+        if (i + 1 == 1 || i + 1 == 2 || i + 1 == 4 || i + 1 == 8 || i + 1 == 16 || i + 1 == 32)
+            continue;
+        if (A[0][i] != A[1][i]) {
+            diffCounter++;
+            if (toChange0 && toChange1) {
+                return 0;
+            }
+            else if (toChange0)
+                bid += A[1][i] * (1llu << j);
+            else if (toChange1)
+                bid += A[0][i] * (1llu << j);
+            else {
+                return 0;
+            }
+        }
+        else
+            bid += A[0][i] * (1llu << j);
+        j++;
+    }
+    if (diffCounter > 7)
+        return 0;
+    return bid;
 }
 
 bool readAnswers() {
@@ -301,17 +369,15 @@ bool readAnswers() {
 }
 
 char *_run(char *data, int size) {
-    QImage mImage = QImage::fromData((uchar *)data, size);
+    qImage = QImage::fromData((uchar *)data, size);
     bool answersStatus = false;
 
-    unsigned long long registrationID = 0;
-    bool barcode = false;
-    if (mImage.width() > mImage.height()) {
+    if (qImage.width() > qImage.height()) {
         QTransform t;
         t.rotate(90);
-        mImage = mImage.transformed(t, Qt::SmoothTransformation);
+        qImage = qImage.transformed(t, Qt::SmoothTransformation);
     }
-    sheet = mImage.scaledToWidth(800, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32);
+    sheet = qImage.scaledToWidth(800, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32);
 
     long long int MM = 0;
     for (int i = 0; i < sheet.width(); i++)
@@ -385,7 +451,6 @@ char *_run(char *data, int size) {
         p.end();
     }
 #endif
-    // sheet.save("./out.jpg");
 
     if (!flags) {
         QString json("{\"error\":\"flags\"}");
@@ -394,7 +459,7 @@ char *_run(char *data, int size) {
         return d;
     }
 
-    barcode = readBarcode();
+    unsigned long long registrationID = readBarcode();
 #ifdef _LEVEL_3
     {
         QPainter p(&sheet);
@@ -438,63 +503,6 @@ char *_run(char *data, int size) {
         p.end();
     }
 #endif
-
-    if (barcode) {
-        bool A[2][46];
-        for (int i = 0; i < 45; i++) {
-            A[0][i] = barcodeTable[i];
-            A[1][i] = (barcodeTable + 45)[i];
-        }
-        A[0][45] = A[1][45] = 0;
-        int toChange0 = 0, toChange1 = 0;
-        for (int i = 0; i <= 5; i++) {
-            bool p1 = false, p2 = false;
-            for (int j = 0; j < 45; j++)
-                if ((1 << i) & (j + 1)) {
-                    p1 ^= A[0][j];
-                    p2 ^= A[1][j];
-                }
-            if (p1)
-                toChange0 += 1 << i;
-            if (p2)
-                toChange1 += 1 << i;
-        }
-        if (toChange0 <= 45 and toChange0 > 0) {
-            A[0][toChange0 - 1] ^= 1;
-        }
-        if (toChange1 <= 45 and toChange1 > 0) {
-            A[1][toChange1 - 1] ^= 1;
-        }
-
-        unsigned long long bid = 0;
-        unsigned diffCounter = 0;
-        for (int i = 0, j = 0; i < 45; i++) {
-            if (i + 1 == 1 || i + 1 == 2 || i + 1 == 4 || i + 1 == 8 || i + 1 == 16 || i + 1 == 32)
-                continue;
-            if (A[0][i] != A[1][i]) {
-                diffCounter++;
-                if (toChange0 && toChange1) {
-                    barcode = false;
-                }
-                else if (toChange0)
-                    bid += A[1][i] * (1llu << j);
-                else if (toChange1)
-                    bid += A[0][i] * (1llu << j);
-                else {
-                    barcode = false;
-                }
-            }
-            else
-                bid += A[0][i] * (1llu << j);
-            j++;
-        }
-        if (diffCounter > 7)
-            barcode = false;
-        if (barcode)
-            registrationID = bid;
-        if (registrationID == 0)
-            barcode = false;
-    }
 
     QJsonObject result;
     if (answersStatus) {
