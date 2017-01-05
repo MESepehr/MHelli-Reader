@@ -98,8 +98,8 @@ Object* detectObject(int x, int y, int W, int H) {
 }
 
 bool findFlags() {
-    f1 = f2 = f3 = f4 = NULL;
     QVector<Object*> objects;
+    f1 = f2 = f3 = f4 = NULL;
     int width = sheet.width();
     int height = sheet.height();
     QPoint origin(width / 2, height / 2);
@@ -223,14 +223,15 @@ bool findFlags() {
     return true;
 }
 
-bool readBarcode() {
+unsigned long long readBarcode() {
     zbar::ImageScanner scanner;
     scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 1);
     QByteArray data;
     QBuffer buffer(&data);
-    qImage.save(&buffer, "jpeg");
-    qImage.save("/tmp/b.jpg", "jpeg");
-    zbar::Image zImage(qImage.width(), qImage.height(), "JPEG", data.constData(), qImage.width() * qImage.height());
+    QImage croppedImage = qImage.copy(QRectF(O + 15 * I + 5 * J, O + 200 * I + 150 * J).toRect());
+    croppedImage.save(&buffer, "jpeg");
+    croppedImage.save("/tmp/b.jpg", "jpeg");
+    zbar::Image zImage(croppedImage.width(), croppedImage.height(), "JPEG", data.constData(), data.count());
     zbar::Image zImage2 = zImage.convert(((unsigned long)('Y')) | ((unsigned long)('8') << 8) | ((unsigned long )('0') << 16) | ((unsigned long)('0') << 24));
     int n = scanner.scan(zImage2);
     if (n > 0)
