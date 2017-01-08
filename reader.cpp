@@ -228,7 +228,7 @@ unsigned long long readBarcode() {
     scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 1);
     QByteArray data;
     QBuffer buffer(&data);
-    QImage croppedImage = qImage.copy(QRectF(O + 15 * I + 5 * J, O + 200 * I + 150 * J).toRect());
+    QImage croppedImage = qImage.copy(QRectF(O + 25 * I + 5 * J, O + 300 * I + 180 * J).toRect());
     croppedImage.save(&buffer, "jpeg");
     croppedImage.save("/tmp/b.jpg", "jpeg");
     zbar::Image zImage(croppedImage.width(), croppedImage.height(), "JPEG", data.constData(), data.count());
@@ -378,7 +378,7 @@ char *_run(char *data, int size) {
         t.rotate(90);
         qImage = qImage.transformed(t, Qt::SmoothTransformation);
     }
-    sheet = qImage.scaledToWidth(800, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32);
+    qImage = sheet = qImage.scaledToWidth(800, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32);
 
     long long int MM = 0;
     for (int i = 0; i < sheet.width(); i++)
