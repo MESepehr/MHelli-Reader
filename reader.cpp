@@ -29,6 +29,7 @@ using namespace std;
 // #define _LEVEL_2
 // #define _LEVEL_3
 // #define _LEVEL_4
+// #define _LEVEL_Q
 
 
 QImage qImage;
@@ -138,7 +139,7 @@ bool findFlags() {
                 continue;
             if (length(o2->center() - center) > 4)
                 continue;
-            if (o2->radius() < 3)
+            if (o2->radius() < 2.2)
                 continue;
             if (o2->radius() > 8)
                 continue;
@@ -228,7 +229,9 @@ unsigned long long readBarcode() {
     QBuffer buffer(&data);
     QImage croppedImage = qImage.copy(QRectF(O + 25 * I + 5 * J, O + 300 * I + 180 * J).toRect().normalized());
     croppedImage.save(&buffer, "jpeg");
+#ifdef _LEVEL_Q
     croppedImage.save("/tmp/b.jpg", "jpeg");
+#endif
     zbar::Image zImage(croppedImage.width(), croppedImage.height(), "JPEG", data.constData(), data.count());
     zbar::Image zImage2 = zImage.convert(((unsigned long)('Y')) | ((unsigned long)('8') << 8) | ((unsigned long )('0') << 16) | ((unsigned long)('0') << 24));
     int n = scanner.scan(zImage2);
