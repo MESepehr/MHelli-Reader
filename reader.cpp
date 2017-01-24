@@ -25,12 +25,10 @@ using namespace std;
 
 #define INTERVAL 80
 
-//#define _LEVEL_0
 // #define _LEVEL_1
 // #define _LEVEL_2
 // #define _LEVEL_3
 // #define _LEVEL_4
-// #define _LEVEL_5
 
 
 QImage qImage;
@@ -405,6 +403,7 @@ char *_run(char *data, int size) {
             for (int j = 0; j < sheet.height(); j++)
                 if (image[i][j])
                     p.drawPoint(i, j);
+        sheet.save("/tmp/1.jpg");
     }
 #endif
 
@@ -450,6 +449,7 @@ char *_run(char *data, int size) {
         p.drawEllipse(b[2], 10, 10);
         p.drawEllipse(b[3], 10, 10);
         p.end();
+        sheet.save("/tmp/2.jpg");
     }
 #endif
 
@@ -478,6 +478,8 @@ char *_run(char *data, int size) {
             }
         }
         p.end();
+        qWarning() << registrationID;
+        sheet.save("/tmp/3.jpg");
     }
 #endif
 
@@ -502,6 +504,7 @@ char *_run(char *data, int size) {
             }
         }
         p.end();
+        sheet.save("/tmp/4.jpg");
     }
 #endif
 
