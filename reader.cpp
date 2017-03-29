@@ -23,8 +23,6 @@ using namespace std;
 
 #define length(P) sqrt((P).x() * (P).x() + (P).y() * (P).y())
 
-#define INTERVAL 80
-
 // #define _LEVEL_1
 // #define _LEVEL_2
 // #define _LEVEL_3
@@ -41,6 +39,7 @@ QPointF I, J, O;
 QPointF b[4];
 int answers[120];
 bool barcodeTable[90];
+QList<QPoint> locations;
 
 Object *f1, *f2, *f3, *f4;
 
@@ -225,9 +224,14 @@ bool findFlags() {
 unsigned long long readBarcode() {
     zbar::ImageScanner scanner;
     scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 1);
+    scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_POSITION, 1);
     QByteArray data;
     QBuffer buffer(&data);
-    QImage croppedImage = qImage.copy(QRectF(O + 25 * I + 5 * J, O + 300 * I + 180 * J).toRect().normalized());
+    QImage croppedImage;
+    if (I == QPointF())
+        croppedImage = qImage.copy(QRect(0, 0, qImage.width(), qImage.height() / 5));
+    else
+        croppedImage = qImage.copy(QRectF(O + 25 * I + 5 * J, O + 300 * I + 180 * J).toRect().normalized());
     croppedImage.save(&buffer, "jpeg");
 #ifdef _LEVEL_Q
     croppedImage.save("/tmp/b.jpg", "jpeg");
@@ -235,8 +239,12 @@ unsigned long long readBarcode() {
     zbar::Image zImage(croppedImage.width(), croppedImage.height(), "JPEG", data.constData(), data.count());
     zbar::Image zImage2 = zImage.convert(((unsigned long)('Y')) | ((unsigned long)('8') << 8) | ((unsigned long )('0') << 16) | ((unsigned long)('0') << 24));
     int n = scanner.scan(zImage2);
-    if (n > 0)
+    if (n > 0) {
+        for (int i = 0; i < zImage2.symbol_begin()->get_location_size(); i++)
+            locations.append(QPoint(zImage2.symbol_begin()->get_location_x(i), zImage2.symbol_begin()->get_location_y(i)));
         return QString::fromStdString(zImage2.symbol_begin()->get_data()).toULongLong();
+    }
+    return 0;
 
     float w = length(b[1] - b[0]) / 31, h = length(b[2] - b[0]) / 2;
     QPointF I = (b[1] - b[0]) / length(b[1] - b[0]);
@@ -371,6 +379,7 @@ bool readAnswers() {
 }
 
 char *_run(char *data, int size) {
+    locations.clear();
     qImage = QImage::fromData((uchar *)data, size);
     bool answersStatus = false;
 
@@ -456,13 +465,6 @@ char *_run(char *data, int size) {
     }
 #endif
 
-    if (!flags) {
-        QString json("{\"error\":\"flags\"}");
-        char *d = new char[json.count() + 1];
-        qstrncpy(d, json.toStdString().c_str(), json.count() + 1);
-        return d;
-    }
-
     unsigned long long registrationID = readBarcode();
 #ifdef _LEVEL_3
     {
@@ -485,6 +487,25 @@ char *_run(char *data, int size) {
         sheet.save("/tmp/3.jpg");
     }
 #endif
+
+    if (!flags) {
+        QJsonObject result;
+        result["error"] = "flags";
+        QJsonArray l;
+        foreach (QPoint point, locations) {
+            QJsonArray p;
+            p.append(point.x());
+            p.append(point.y());
+            l.append(p);
+        }
+        result["locations"] = l;
+        if (registrationID)
+            result["id"] = QString::number(registrationID);
+        QString json(QJsonDocument(result).toJson(QJsonDocument::Compact));
+        char *d = new char[json.count() + 1];
+        qstrncpy(d, json.toStdString().c_str(), json.count() + 1);
+        return d;
+    }
 
     answersStatus = readAnswers();
 #ifdef _LEVEL_4
