@@ -381,6 +381,9 @@ bool readAnswers() {
 char *_run(char *data, int size) {
     locations.clear();
     qImage = QImage::fromData((uchar *)data, size);
+    I = QPointF();
+    J = QPointF();
+    O = QPointF();
     bool answersStatus = false;
 
     if (qImage.width() > qImage.height()) {
