@@ -366,6 +366,7 @@ bool readAnswers() {
                         }
                     }
                     counter = qMax(0u, counter);
+                    qWarning() << i << j << k << counter;
                     if (counter > (25 * 10) * 255 * 1 / 8 and counter / (25 * 10) > mid * 4 / 3) {
                         dd |= 1 << k;
                     }
