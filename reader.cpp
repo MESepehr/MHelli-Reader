@@ -336,6 +336,7 @@ bool readAnswers() {
         return false;
     QPointF base(O + 115 * I + 315 * J);
     float c = 220, w = 32, h = 22.1;
+    QList<unsigned> weights;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 30; j++) {
             unsigned long mid = 0, var = 0;
@@ -366,7 +367,52 @@ bool readAnswers() {
                         }
                     }
                     counter = qMax(0u, counter);
-                    if (counter > (25 * 10) * 255 * 1 / 8 and counter / (25 * 10) > mid * 4 / 3) {
+                    if (counter > (25 * 10) * 255 * 1 / 9 and counter / (25 * 10) > mid * 4 / 3) {
+                        weights << counter;
+                    }
+                }
+            }
+        }
+    }
+    qSort(weights);
+    if (weights.count() == 0)
+        return true;
+    unsigned median = weights[weights.count() / 2];
+    foreach (unsigned weight, weights)
+        if (weight < median * 3 / 4)
+            weights.removeAll(weight);
+    unsigned minWeight = weights[0] * 4 / 5;
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 30; j++) {
+            unsigned long mid = 0, var = 0;
+            int dd = 0;
+            for (int k = 0; k < 4; k++) {
+                QPointF localBase(base + i * c * I + j * h * J + k * w * I);
+                int counter = 0;
+                for (int x = 0; x < 25; x++) {
+                    for (int y = 0; y < 10; y++) {
+                        QPoint point((localBase + x * I + y * J).toPoint());
+                        counter += imageOptions[point.x()][point.y()];
+                    }
+                }
+                counter /= 25 * 10;
+                mid += counter;
+                var += counter * counter * counter * counter;
+            }
+            mid /= 4;
+            var = sqrt(sqrt(var - mid * mid));
+            if (var > 31) {
+                for (int k = 0; k < 4; k++) {
+                    QPointF localBase(base + i * c * I + j * h * J + k * w * I);
+                    unsigned counter = 0;
+                    for (int x = 0; x < 25; x++) {
+                        for (int y = 0; y < 10; y++) {
+                            QPoint point((localBase + x * I + y * J).toPoint());
+                            counter += imageOptions[point.x()][point.y()];
+                        }
+                    }
+                    counter = qMax(0u, counter);
+                    if (counter > minWeight and counter / (25 * 10) > mid * 4 / 3) {
                         dd |= 1 << k;
                     }
                 }
