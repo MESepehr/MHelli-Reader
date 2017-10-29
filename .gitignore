@@ -6,3 +6,4 @@
 *.o
 Makefile
 /tags
+compile_commands.json
