@@ -334,6 +334,8 @@ unsigned long long readBarcode() {
 bool readAnswers() {
     if (not f1 or not f2 or not f3 or not f4)
         return false;
+    for (unsigned i = 0; i < 120; i++)
+        answers[i] = 0;
     QPointF base(O + 115 * I + 315 * J);
     float c = 220, w = 32, h = 22.1;
     QList<unsigned> weights;
