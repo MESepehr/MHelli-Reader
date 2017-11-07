@@ -379,7 +379,7 @@ bool readAnswers() {
         return true;
     unsigned median = weights[weights.count() * 2 / 3];
     foreach (unsigned weight, weights)
-        if (weight < median * 3 / 4)
+        if (weight < median * 1 / 2)
             weights.removeAll(weight);
     unsigned minWeight = weights[0] * 2 / 3;
     for (int i = 0; i < 4; i++) {
