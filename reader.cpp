@@ -381,7 +381,7 @@ bool readAnswers() {
     foreach (unsigned weight, weights)
         if (weight < median * 3 / 4)
             weights.removeAll(weight);
-    unsigned minWeight = weights[0] * 4 / 5;
+    unsigned minWeight = weights[0] * 3 / 4;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 30; j++) {
             unsigned long mid = 0, var = 0;
