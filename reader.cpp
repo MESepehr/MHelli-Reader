@@ -23,11 +23,11 @@ using namespace std;
 
 #define length(P) sqrt((P).x() * (P).x() + (P).y() * (P).y())
 
-#define _LEVEL_1
-#define _LEVEL_2
-#define _LEVEL_3
-#define _LEVEL_4
-#define _LEVEL_Q
+// #define _LEVEL_1
+// #define _LEVEL_2
+// #define _LEVEL_3
+// #define _LEVEL_4
+// #define _LEVEL_Q
 
 
 QImage qImage;
@@ -382,7 +382,6 @@ bool readAnswers() {
         if (weight < median * 3 / 4)
             weights.removeAll(weight);
     unsigned minWeight = weights[0] * 4 / 5;
-    qWarning() << minWeight;
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 30; j++) {
             unsigned long mid = 0, var = 0;
@@ -413,7 +412,6 @@ bool readAnswers() {
                         }
                     }
                     counter = qMax(0u, counter);
-                    qWarning() << i * 30 + j + 1 << k + 1 << counter;
                     if (counter > minWeight and counter / (25 * 10) > mid * 4 / 3) {
                         dd |= 1 << k;
                     }
