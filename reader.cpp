@@ -23,6 +23,7 @@ using namespace std;
 
 #define length(P) sqrt((P).x() * (P).x() + (P).y() * (P).y())
 
+// #define _DEBUG
 // #define _LEVEL_1
 // #define _LEVEL_2
 // #define _LEVEL_3
@@ -342,7 +343,6 @@ bool readAnswers() {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 30; j++) {
             unsigned long mid = 0, var = 0;
-            int dd = 0;
             for (int k = 0; k < 4; k++) {
                 QPointF localBase(base + i * c * I + j * h * J + k * w * I);
                 int counter = 0;
@@ -384,6 +384,9 @@ bool readAnswers() {
         if (weight < median * 1 / 2)
             weights.removeAll(weight);
     unsigned minWeight = weights[0] * 2 / 3;
+#ifdef _DEBUG_
+    qWarning() << minWeight;
+#endif
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 30; j++) {
             unsigned long mid = 0, var = 0;
@@ -403,6 +406,9 @@ bool readAnswers() {
             }
             mid /= 4;
             var = sqrt(sqrt(var - mid * mid));
+#ifdef _DEBUG_
+            qWarning() << i * 30 + j + 1 << mid << var;
+#endif
             if (var > 31) {
                 for (int k = 0; k < 4; k++) {
                     QPointF localBase(base + i * c * I + j * h * J + k * w * I);
@@ -414,6 +420,9 @@ bool readAnswers() {
                         }
                     }
                     counter = qMax(0u, counter);
+#ifdef _DEBUG_
+                    qWarning() << i * 30 + j + 1 << counter << counter / (25 * 10) << mid * 4 / 3;
+#endif
                     if (counter > minWeight and counter / (25 * 10) > mid * 4 / 3) {
                         dd |= 1 << k;
                     }
@@ -455,8 +464,8 @@ char *_run(char *data, int size) {
             int r = qRed(sheet.pixel(i, j));
             int g = qGreen(sheet.pixel(i, j));
             int b = qBlue(sheet.pixel(i, j));
-            image[i][j] = (r + g) / 2 < MM and abs(r - b) + abs(r - g) < 100 ? 255 - qGray(sheet.pixel(i, j)) : 0;
-            imageOptions[i][j] = (r + g) / 2 < (MM * 3 / 2) and abs(r - b) + abs(r - g) < 100 ? 255 - qGray(sheet.pixel(i, j)) : 0;
+            image[i][j] = (r + g) / 2 < MM and abs(r - b) + abs(r - g) < 130 ? 255 - qGray(sheet.pixel(i, j)) : 0;
+            imageOptions[i][j] = (r + g) / 2 < (MM * 3 / 2) and abs(r - b) + abs(r - g) < 130 ? 255 - qGray(sheet.pixel(i, j)) : 0;
         }
 
 #ifdef _LEVEL_1
@@ -464,8 +473,10 @@ char *_run(char *data, int size) {
         QPainter p(&sheet);
         for (int i = 0; i < sheet.width(); i++)
             for (int j = 0; j < sheet.height(); j++)
-                if (image[i][j])
+                if (image[i][j]) {
+                    p.setPen(QColor(255 - image[i][j], 255 - image[i][j], 255 - image[i][j], 255));
                     p.drawPoint(i, j);
+                };
         sheet.save("/tmp/1.jpg");
     }
 #endif
