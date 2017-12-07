@@ -23,12 +23,12 @@ using namespace std;
 
 #define length(P) sqrt((P).x() * (P).x() + (P).y() * (P).y())
 
-// #define _DEBUG
-// #define _LEVEL_1
-// #define _LEVEL_2
-// #define _LEVEL_3
-// #define _LEVEL_4
-// #define _LEVEL_Q
+#define _DEBUG_
+#define _LEVEL_1
+#define _LEVEL_2
+#define _LEVEL_3
+#define _LEVEL_4
+#define _LEVEL_Q
 
 
 QImage qImage;
@@ -409,7 +409,7 @@ bool readAnswers() {
 #ifdef _DEBUG_
             qWarning() << i * 30 + j + 1 << mid << var;
 #endif
-            if (var > 31) {
+            if (var > 25) {
                 for (int k = 0; k < 4; k++) {
                     QPointF localBase(base + i * c * I + j * h * J + k * w * I);
                     unsigned counter = 0;
