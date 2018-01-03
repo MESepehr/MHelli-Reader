@@ -23,12 +23,11 @@ using namespace std;
 
 #define length(P) sqrt((P).x() * (P).x() + (P).y() * (P).y())
 
-#define _DEBUG_
-#define _LEVEL_1
-#define _LEVEL_2
-#define _LEVEL_3
-#define _LEVEL_4
-#define _LEVEL_Q
+// #define _DEBUG_
+// #define _LEVEL_1
+// #define _LEVEL_2
+// #define _LEVEL_3
+// #define _LEVEL_Q
 
 
 QImage qImage;
@@ -37,7 +36,7 @@ unsigned char image[1200][1200];
 unsigned char imageOptions[1200][1200];
 QImage sheet;
 QPointF I, J, O;
-QPointF b[4];
+int OPTIONS;
 int answers[120];
 bool barcodeTable[90];
 QList<QPoint> locations;
@@ -195,30 +194,6 @@ bool findFlags() {
     I = horizontalBorder / 1000;
     J = verticalBorder / 1000;
     O = f3->center();
-
-    QPointF base[4] = {QPointF(O + 57 * I + 110 * J),
-        QPointF(O + 57 * I + 110 * J + 30 * 22.3 * I),
-        QPointF(O + 57 * I + 110 * J + 3 * 18 * J),
-        QPointF(O + 57 * I + 110 * J + 30 * 22.3 * I + 3 * 18 * J)};
-    float l[4] = {-1, -1, -1, -1};
-    foreach (Object *o, objects) {
-        for (int i = 0; i < 4; i++) {
-            QPointF p(o->center() - base[i]);
-            float X = p.x() * I.x() + p.y() * I.y();
-            if (i % 2)
-                X = -X;
-            float Y = p.x() * J.x() + p.y() * J.y();
-            if (i > 1)
-                Y = -Y;
-            if (o->sigma() < 7 and X > 0 and Y > 0) {
-                if (l[i] < 0 or X * X * X + Y * Y * Y < l[i]) {
-                    b[i] = o->center();
-                    l[i] = X * X * X + Y * Y * Y;
-                }
-            }
-        }
-    }
-
     return true;
 }
 
@@ -246,90 +221,6 @@ unsigned long long readBarcode() {
         return QString::fromStdString(zImage2.symbol_begin()->get_data()).toULongLong();
     }
     return 0;
-
-    float w = length(b[1] - b[0]) / 31, h = length(b[2] - b[0]) / 2;
-    QPointF I = (b[1] - b[0]) / length(b[1] - b[0]);
-    QPointF J = (b[2] - b[0]) / length(b[2] - b[0]);
-
-    unsigned long long mid = 0, cc = 0;
-    for (int i = 1; i < 31; i++) {
-        for (int j = 0; j < 3; j++) {
-            QPointF localBase(b[1] - w * i * I + h * j * J);
-            for (float x = -w / 2; x <= w / 2; x++) {
-                for (float y = -h / 2; y <= h / 2; y++) {
-                    QPoint point((localBase + x * I + y * J).toPoint());
-                    cc++;
-                    mid += image[point.x()][point.y()];
-                }
-            }
-        }
-    }
-    mid /= cc;
-    for (int i = 1; i < 31; i++) {
-        for (int j = 0; j < 3; j++) {
-            QPointF localBase(b[1] - w * i * I + h * j * J);
-            int counter = 0;
-            for (float x = -w / 2; x <= w / 2; x++) {
-                for (float y = -h / 2; y <= h / 2; y++) {
-                    QPoint point((localBase + x * I + y * J).toPoint());
-                    counter += image[point.x()][point.y()];
-                }
-            }
-            barcodeTable[i - 1 + j * 30] = counter > w * h * mid;
-        }
-    }
-
-    bool A[2][46];
-    for (int i = 0; i < 45; i++) {
-        A[0][i] = barcodeTable[i];
-        A[1][i] = (barcodeTable + 45)[i];
-    }
-    A[0][45] = A[1][45] = 0;
-    int toChange0 = 0, toChange1 = 0;
-    for (int i = 0; i <= 5; i++) {
-        bool p1 = false, p2 = false;
-        for (int j = 0; j < 45; j++)
-            if ((1 << i) & (j + 1)) {
-                p1 ^= A[0][j];
-                p2 ^= A[1][j];
-            }
-        if (p1)
-            toChange0 += 1 << i;
-        if (p2)
-            toChange1 += 1 << i;
-    }
-    if (toChange0 <= 45 and toChange0 > 0) {
-        A[0][toChange0 - 1] ^= 1;
-    }
-    if (toChange1 <= 45 and toChange1 > 0) {
-        A[1][toChange1 - 1] ^= 1;
-    }
-
-    unsigned long long bid = 0;
-    unsigned diffCounter = 0;
-    for (int i = 0, j = 0; i < 45; i++) {
-        if (i + 1 == 1 || i + 1 == 2 || i + 1 == 4 || i + 1 == 8 || i + 1 == 16 || i + 1 == 32)
-            continue;
-        if (A[0][i] != A[1][i]) {
-            diffCounter++;
-            if (toChange0 && toChange1) {
-                return 0;
-            }
-            else if (toChange0)
-                bid += A[1][i] * (1llu << j);
-            else if (toChange1)
-                bid += A[0][i] * (1llu << j);
-            else {
-                return 0;
-            }
-        }
-        else
-            bid += A[0][i] * (1llu << j);
-        j++;
-    }
-    if (diffCounter > 7)
-        return 0;
-    return bid;
 }
 
 bool readAnswers() {
@@ -343,7 +234,7 @@ bool readAnswers() {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 30; j++) {
             unsigned long mid = 0, var = 0;
-            for (int k = 0; k < 4; k++) {
+            for (int k = 0; k < OPTIONS; k++) {
                 QPointF localBase(base + i * c * I + j * h * J + k * w * I);
                 int counter = 0;
                 for (int x = 0; x < 25; x++) {
@@ -356,10 +247,10 @@ bool readAnswers() {
                 mid += counter;
                 var += counter * counter * counter * counter;
             }
-            mid /= 4;
+            mid /= OPTIONS;
             var = sqrt(sqrt(var - mid * mid));
             if (var > 31) {
-                for (int k = 0; k < 4; k++) {
+                for (int k = 0; k < OPTIONS; k++) {
                     QPointF localBase(base + i * c * I + j * h * J + k * w * I);
                     unsigned counter = 0;
                     for (int x = 0; x < 25; x++) {
@@ -391,7 +282,7 @@ bool readAnswers() {
         for (int j = 0; j < 30; j++) {
             unsigned long mid = 0, var = 0;
             int dd = 0;
-            for (int k = 0; k < 4; k++) {
+            for (int k = 0; k < OPTIONS; k++) {
                 QPointF localBase(base + i * c * I + j * h * J + k * w * I);
                 int counter = 0;
                 for (int x = 0; x < 25; x++) {
@@ -410,7 +301,7 @@ bool readAnswers() {
             qWarning() << i * 30 + j + 1 << mid << var;
 #endif
             if (var > 25) {
-                for (int k = 0; k < 4; k++) {
+                for (int k = 0; k < OPTIONS; k++) {
                     QPointF localBase(base + i * c * I + j * h * J + k * w * I);
                     unsigned counter = 0;
                     for (int x = 0; x < 25; x++) {
@@ -428,16 +319,20 @@ bool readAnswers() {
                     }
                 }
             }
-            if ((dd & 1) + (dd & 2) / 2 + (dd & 4) / 4 + (dd & 8) / 8 < 3)
+            int sum = 0;
+            for (int k = 0; k < OPTIONS; k++)
+                sum += (dd & (1 << k)) / (1 << k);
+            if (sum < (OPTIONS + 1) / 2)
                 answers[i * 30 + j] = dd;
         }
     }
     return true;
 }
 
-char *_run(char *data, int size) {
+char *_run(char *data, int size, int options) {
     locations.clear();
     qImage = QImage::fromData((uchar *)data, size);
+    OPTIONS = options;
     I = QPointF();
     J = QPointF();
     O = QPointF();
@@ -518,37 +413,12 @@ char *_run(char *data, int size) {
         p.drawEllipse(QPointF(O + 57 * I + 110 * J + 30 * 22.3 * I + 3 * 18 * J), 5, 5);
 
         p.setBrush(QBrush(QColor(0, 255, 255, 127)));
-        p.drawEllipse(b[0], 10, 10);
-        p.drawEllipse(b[1], 10, 10);
-        p.drawEllipse(b[2], 10, 10);
-        p.drawEllipse(b[3], 10, 10);
         p.end();
         sheet.save("/tmp/2.jpg");
     }
 #endif
 
     unsigned long long registrationID = readBarcode();
-#ifdef _LEVEL_3
-    {
-        QPainter p(&sheet);
-        float w = length(b[1] - b[0]) / 31, h = length(b[2] - b[0]) / 2;
-        QPointF I = (b[1] - b[0]) / length(b[1] - b[0]);
-        QPointF J = (b[2] - b[0]) / length(b[2] - b[0]);
-
-        for (int i = 1; i < 31; i++) {
-            for (int j = 0; j < 3; j++) {
-                QPointF localBase(b[1] - w * i * I + h * j * J);
-                p.setPen(barcodeTable[i - 1 + j * 30] ? QColor(0, 255, 255, 137) : QColor(255, 255, 255, 187));
-                for (float x = -w / 2; x <= w / 2; x++)
-                    for (float y = -h / 2; y <= h / 2; y++)
-                        p.drawPoint(localBase + x * I + y * J);
-            }
-        }
-        p.end();
-        qWarning() << registrationID;
-        sheet.save("/tmp/3.jpg");
-    }
-#endif
 
     if (!flags) {
         QJsonObject result;
@@ -570,7 +440,7 @@ char *_run(char *data, int size) {
     }
 
     answersStatus = readAnswers();
-#ifdef _LEVEL_4
+#ifdef _LEVEL_3
     {
         QPainter p(&sheet);
         p.setPen(QColor(0, 0, 0));
@@ -612,6 +482,6 @@ char *_run(char *data, int size) {
 }
 
 extern "C" {
-    char *run(char *image, int size) {return _run(image, size);}
+    char *run(char *image, int size, int options) {return _run(image, size, options);}
     void freeString(char *ptr) {delete ptr;}
 }
