@@ -482,6 +482,6 @@ char *_run(char *data, int size, int options) {
 }
 
 extern "C" {
-    char *run(char *image, int size, int options) {qWarning() << size << options; return _run(image, size, options);}
+    char *run(char *image, int size, int options) {return _run(image, size, options);}
     void freeString(char *ptr) {delete ptr;}
 }
