@@ -454,7 +454,7 @@ bool readAnswers300() {
   return true;
 }
 
-char *_run(char *data, int size, int options) {
+char *_run(char *data, int size, int options, int type) {
   locations.clear();
   qImage = QImage::fromData((uchar *)data, size);
   OPTIONS = options;
@@ -571,27 +571,19 @@ char *_run(char *data, int size, int options) {
     return d;
   }
 
-  int type;
-  if (length(f1->center() - f2->center()) /
-          length(f1->center() - f3->center()) >=
-      1.45)
-    type = 0;
-  else
-    type = 1;
-
   switch (type) {
-  case 0:
-    answersStatus = readAnswers120();
-    break;
-  case 1:
+  case 14:
     answersStatus = readAnswers300();
+    break;
+  case 15:
+    answersStatus = readAnswers120();
     break;
   }
 #ifdef _LEVEL_3
   {
     QPainter p(&sheet);
     p.setPen(QColor(0, 0, 0));
-    if (type == 1) {
+    if (type == 14) {
       QPointF base(O + 88 * I + 215 * J);
       float c = 151, w = 21.8, h = 15.2;
 
@@ -632,10 +624,9 @@ char *_run(char *data, int size, int options) {
 #endif
 
   QJsonObject result;
-  result["type"] = type;
   if (answersStatus) {
     QJsonArray A;
-    for (int i = 0; i < (type == 0 ? 120 : 300); i++) {
+    for (int i = 0; i < (type == 15 ? 120 : 300); i++) {
       A.append(answers[i]);
     }
     result["answers"] = A;
@@ -650,8 +641,8 @@ char *_run(char *data, int size, int options) {
 }
 
 extern "C" {
-char *run(char *image, int size, int options) {
-  return _run(image, size, options);
+char *run(char *image, int size, int options, int type) {
+  return _run(image, size, options, type);
 }
 void freeString(char *ptr) { delete ptr; }
 }
