@@ -204,14 +204,14 @@ bool findFlags() {
   return true;
 }
 
-unsigned long long readBarcode() {
+unsigned long long readBarcode(bool wide) {
   zbar::ImageScanner scanner;
   scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 1);
   scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_POSITION, 1);
   QByteArray data;
   QBuffer buffer(&data);
   QImage croppedImage;
-  if (I == QPointF())
+  if (I == QPointF() or wide)
     croppedImage =
         qImage.copy(QRect(0, 0, qImage.width(), qImage.height() / 5));
   else
@@ -550,7 +550,9 @@ char *_run(char *data, int size, int options, int type) {
   }
 #endif
 
-  unsigned long long registrationID = readBarcode();
+  unsigned long long registrationID = readBarcode(false);
+  if (not registrationID)
+      registrationID = readBarcode(true);
 
   if (!flags) {
     QJsonObject result;
