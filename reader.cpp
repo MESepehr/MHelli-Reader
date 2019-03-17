@@ -134,15 +134,15 @@ bool findFlags() {
     if (counter > 40)
       continue;
     foreach (Object *o2, objects) {
-      float sigma = o2->sigma();
       if (o2 == o)
         continue;
       if (length(o2->center() - center) > 4)
         continue;
-      if (o2->radius() < 2.2)
+      if (o2->radius() < 2.12)
         continue;
       if (o2->radius() > 8)
         continue;
+      float sigma = o2->sigma();
       if (sigma > 3)
         continue;
       candidates << o;
