@@ -203,7 +203,7 @@ bool findFlags() {
   O = f3->center();
   return true;
 }
-
+//QImage yek format ax baraye dastresi daghigh be pixel haye ye image ast dar c++
 unsigned long long readBarcode(bool wide) {
   zbar::ImageScanner scanner;
   scanner.set_config(zbar::ZBAR_NONE, zbar::ZBAR_CFG_ENABLE, 1);
@@ -244,12 +244,14 @@ bool readAnswers120() {
   for (unsigned i = 0; i < 120; i++)
     answers[i] = 0;
   QPointF base(O + 115 * I + 315 * J);
+  //andazeye gozine ha
   float c = 220, w = 32, h = 22.1;
   QList<unsigned> weights;
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 30; j++) {
       unsigned long mid = 0, var = 0;
       for (int k = 0; k < OPTIONS; k++) {
+        //be tedade gozine ha
         QPointF localBase(base + i * c * I + j * h * J + k * w * I);
         int counter = 0;
         for (int x = 0; x < 25; x++) {
@@ -259,6 +261,7 @@ bool readAnswers120() {
           }
         }
         counter /= 25 * 10;
+        //Miangine range hozine
         mid += counter;
         var += counter * counter * counter * counter;
       }
@@ -340,6 +343,8 @@ bool readAnswers120() {
       for (int k = 0; k < OPTIONS; k++)
         sum += (dd & (1 << k)) / (1 << k);
       if (sum < (OPTIONS + 1) / 2)
+      //i = sotun
+      //j = satr
         answers[i * 30 + j] = dd;
     }
   }
@@ -464,10 +469,12 @@ char *_run(char *data, int size, int options, int type) {
   bool answersStatus = false;
 
   if (qImage.width() > qImage.height()) {
+    //Safhe amudi mishavad
     QTransform t;
     t.rotate(90);
     qImage = qImage.transformed(t, Qt::SmoothTransformation);
   }
+  //Payna mishavad 800 pixel
   qImage = sheet = qImage.scaledToWidth(800, Qt::SmoothTransformation)
                        .convertToFormat(QImage::Format_ARGB32);
 
@@ -485,9 +492,12 @@ char *_run(char *data, int size, int options, int type) {
       int r = qRed(sheet.pixel(i, j));
       int g = qGreen(sheet.pixel(i, j));
       int b = qBlue(sheet.pixel(i, j));
+      //Meshki bashad( az miangine ghermez v sabze kol kamtar bashad va khotute abi dide nemisavad ) va ghatan khotute abi nabashad = 0 agar na rang karde ha
+      //Harja siah bood mishe sefid abi ha mishan siah, kolan reverse image
       image[i][j] = (r + g) / 2 < MM and abs(r - b) + abs(r - g) < 130
                         ? 255 - qGray(sheet.pixel(i, j))
                         : 0;
+      //Ehtemale sefid shodane paiini kamtare 
       imageOptions[i][j] =
           (r + g) / 2 < (MM * 3 / 2) and abs(r - b) + abs(r - g) < 130
               ? 255 - qGray(sheet.pixel(i, j))
