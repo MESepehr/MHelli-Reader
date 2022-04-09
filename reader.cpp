@@ -34,11 +34,20 @@ bool checked[1200][1200];
 unsigned char image[1200][1200];
 unsigned char imageOptions[1200][1200];
 QImage sheet;
+/** I یک هزارم طول چپ با راست صفحه و مقدار مثبت
+J یک هزارم ارتفاع بالا به پایین صفحه با مقدار مثبت
+O نقطه ی بالا سمت چپ صفحه و معادل نقطه ی f3
+*/
 QPointF I, J, O;
 int OPTIONS;
 int answers[300];
 QList<QPoint> locations;
 
+/**f1 top right
+  f2 down righ
+  f3 top left
+  f4 down left
+*/
 Object *f1, *f2, *f3, *f4;
 
 Object *detectObject(int x, int y, int W, int H) {
@@ -137,33 +146,36 @@ bool findFlags() {
     QPoint center = o->center();
     int counter = 0;
     foreach (Object *o2, objects)
+    //چک می کنه ببینه نقطه جدید ازنقطه ما راست تر و پایین تره؟
       if (length(o2->center() - origin) > length(center - origin))
         counter++;
     if (counter > 40)
-      continue;
+      continue;//اگر ۴۰ نقطه ازش راست تر و پایین تر بودن میریم سراغ یه نقطه دیگه
     foreach (Object *o2, objects) {
       if (o2 == o)
         continue;
       if (length(o2->center() - center) > 4)
-        continue;
+        continue;// اگر نقطه جدید از نقطه ما ۴ پیکسل دورتر بود یه نقطه نزدیکتر پیدا کنه
       if (o2->radius() < 2.12)
-        continue;
+        continue;//اگر شعاعش از ۲ پیکسل کمتر بود بیخیال بشه
       if (o2->radius() > 8)
-        continue;
+        continue;// اگر شعا از ۸ پیکسل بیشتر بود باز بی خیال بشه
       float sigma = o2->sigma();
       if (sigma > 3)
-        continue;
-      candidates << o;
+        continue;// سیگما نمی تونم چیه
+      candidates << o;//این داره میگه اگه این نقطه چون نقطه های کوچیک با شعای کم و در اطرافش داشته، بیفته توی این لیست
     }
   }
   foreach (Object *o1, candidates) {
+    /**مختصات نقطه ما می افته نسبت به وسط صفحه*/
     QPoint p1 = o1->center() - origin;
     foreach (Object *o2, candidates) {
       if (o2 == o1)
         continue;
+        /**نقطه دوم می افته نسبت به مرکز صفحه*/
       QPoint p2 = o2->center() - origin;
       if (length(p1 - p2) < height / 2)
-        continue;
+        continue;//اگر اختلاف فاصله نقطه های ما از نصف صفحه (یه عدد واضح) کمتر باشه، نقطه های نشانه ما نیست پس برو نقطه بعدی
       if (p1.x() * p2.y() - p1.y() * p2.x() < 0)
         continue;
       f1 = o1;
@@ -201,8 +213,10 @@ bool findFlags() {
 
   if (!f3 || !f4)
     return false;
+    //میانگین ارتفاه بین نقطه ها
   verticalBorder =
       (f2->center() - f1->center() + f4->center() - f3->center()) / 2;
+      //میانگین طول بین نقطه ها
   horizontalBorder =
       -(f3->center() - f1->center() + f4->center() - f2->center()) / 2;
 
