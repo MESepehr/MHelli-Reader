@@ -102,14 +102,20 @@ bool findFlags() {
   f1 = f2 = f3 = f4 = NULL;
   int width = sheet.width();
   int height = sheet.height();
+  /**وسط صفحهی ما. میشه ۴۰۰ در حدود ۵۶۰*/
   QPoint origin(width / 2, height / 2);
 
+  //کل صفحه رو بگرد
   for (int i = 0; i < width; i++) {
     for (int j = 0; j < height; j++) {
       if (checked[i][j])
         continue;
+        //دایره هارو پیدا کن
       Object *o = detectObject(i, j, sheet.width(), sheet.height());
       if (o->surface() < 10) {
+        //اگر دایره از ۱۰ پیکسل کوچیکتر بود بنداز دور
+        //اگر صفحه به اندازه ۸۰۰ پیکسل طول داشته باشه (horizontal) 
+        //  دایره های گوشه های صفحه میشن حدود ۲۰ پیکسل
         delete o;
         continue;
       }
@@ -121,11 +127,13 @@ bool findFlags() {
   foreach (Object *o, objects) {
     float radius = o->radius();
     if (radius > 20 || radius < 5)
+      // باز چک می کنه اگر شعای دایره ها تو این بازه ها بودن بندازه دور. شعاع دایره باید در حدود ۱۰ پیکسل باشد
       continue;
     float sigma = o->sigma();
     if (sigma > 3)
       continue;
 
+    /**وسط نقطه ی فعلی ما در حلقه ی اول*/
     QPoint center = o->center();
     int counter = 0;
     foreach (Object *o2, objects)
