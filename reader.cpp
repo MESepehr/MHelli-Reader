@@ -376,7 +376,7 @@ bool readAnswers120() {
 bool readAnswers300() {
   if (not f1 or not f2 or not f3 or not f4)
     return false;
-  for (unsigned i = 0; i < 120; i++)
+  for (unsigned i = 0; i < 300; i++)//Shouldnt be 300?
     answers[i] = 0;
   QPointF base(O + 88 * I + 215 * J);
   float c = 151, w = 21.8, h = 15.2;
@@ -481,6 +481,7 @@ bool readAnswers300() {
   return true;
 }
 
+/**دریافت فایل صفحه ی اسکن شده*/
 char *_run(char *data, int size, int options, int type) {
   locations.clear();
   qImage = QImage::fromData((uchar *)data, size);
