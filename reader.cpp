@@ -265,24 +265,32 @@ bool readAnswers120() {
     return false;
   for (unsigned i = 0; i < 120; i++)
     answers[i] = 0;
+  /**
+  نقطه ی شروع اول سوال اول گزنه اول
+  */
   QPointF base(O + 115 * I + 315 * J);
-  //andazeye gozine ha
+  //c قاصله بین گزینه ی اول ستون اول تا اول گزینه اول ستون دوم
+  // w , h پهنای یک گزینه
   float c = 220, w = 32, h = 22.1;
+  float gozineW = 25 ;
+  float gozineH = 10 ;
   QList<unsigned> weights;
-  for (int i = 0; i < 4; i++) {
-    for (int j = 0; j < 30; j++) {
+  for (int i = 0; i < 4; i++) {//جهار ستون
+    for (int j = 0; j < 30; j++) { // سی سوال در هر ستون
       unsigned long mid = 0, var = 0;
-      for (int k = 0; k < OPTIONS; k++) {
+      for (int k = 0; k < OPTIONS; k++) { // n گزینه برای هر سوال
         //be tedade gozine ha
+        //نقطه ی شروع گزینه
         QPointF localBase(base + i * c * I + j * h * J + k * w * I);
         int counter = 0;
-        for (int x = 0; x < 25; x++) {
-          for (int y = 0; y < 10; y++) {
+        for (int x = 0; x < gozineW; x++) {// پهنای مورد نیاز برای پردازش گزینه طبق تشخیص ۲۵ پیکسل در ۱۰ پیکسل است.
+          for (int y = 0; y < gozineH; y++) {
             QPoint point((localBase + x * I + y * J).toPoint());
             counter += imageOptions[point.x()][point.y()];
           }
         }
-        counter /= 25 * 10;
+        //میانگین رنگ های پیکسل های گزینه
+        counter /= gozineW * gozineH;
         //Miangine range hozine
         mid += counter;
         var += counter * counter * counter * counter;
@@ -293,15 +301,15 @@ bool readAnswers120() {
         for (int k = 0; k < OPTIONS; k++) {
           QPointF localBase(base + i * c * I + j * h * J + k * w * I);
           unsigned counter = 0;
-          for (int x = 0; x < 25; x++) {
-            for (int y = 0; y < 10; y++) {
+          for (int x = 0; x < gozineW; x++) {
+            for (int y = 0; y < gozineH; y++) {
               QPoint point((localBase + x * I + y * J).toPoint());
               counter += imageOptions[point.x()][point.y()];
             }
           }
           counter = qMax(0u, counter);
-          if (counter > (25 * 10) * 255 * 1 / 9 and
-              counter / (25 * 10) > mid * 4 / 3) {
+          if (counter > (gozineW * gozineH) * 255 * 1 / 9 and
+              counter / (gozineW * gozineH) > mid * 4 / 3) {
             weights << counter;
           }
         }
@@ -322,6 +330,8 @@ bool readAnswers120() {
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 30; j++) {
       unsigned long mid = 0, var = 0;
+
+      //کد گزینه انتخاب شده. به صورت باینری به ازای هر بیت یک گزینه
       int dd = 0;
       for (int k = 0; k < OPTIONS; k++) {
         QPointF localBase(base + i * c * I + j * h * J + k * w * I);
@@ -345,8 +355,8 @@ bool readAnswers120() {
         for (int k = 0; k < OPTIONS; k++) {
           QPointF localBase(base + i * c * I + j * h * J + k * w * I);
           unsigned counter = 0;
-          for (int x = 0; x < 25; x++) {
-            for (int y = 0; y < 10; y++) {
+          for (int x = 0; x < gozineW; x++) {
+            for (int y = 0; y < gozineH; y++) {
               QPoint point((localBase + x * I + y * J).toPoint());
               counter += imageOptions[point.x()][point.y()];
             }
@@ -364,7 +374,7 @@ bool readAnswers120() {
       int sum = 0;
       for (int k = 0; k < OPTIONS; k++)
         sum += (dd & (1 << k)) / (1 << k);
-      if (sum < (OPTIONS + 1) / 2)
+      if (sum < (OPTIONS + 1) / 2)//بررسی اینکه عدد پاسخ از تعداد گزینه ها بیشتر نشده باشد
       //i = sotun
       //j = satr
         answers[i * 30 + j] = dd;
@@ -545,6 +555,7 @@ char *_run(char *data, int size, int options, int type) {
 
 #ifdef _LEVEL_2
   {
+    //بخش های مخدوش و بی ارتباط به گزینه ها را حذف می کند
     QPainter p(&sheet);
     if (f1) {
       p.setBrush(QBrush(QColor(255, 255, 0, 127)));
@@ -616,6 +627,7 @@ char *_run(char *data, int size, int options, int type) {
   }
 #ifdef _LEVEL_3
   {
+    //بخش دیباگر کد. گزینه های یافت شده را پیدا می کند و روی تصویر می کشد و در تمپ برای بررسی قرار می دهد.
     QPainter p(&sheet);
     p.setPen(QColor(0, 0, 0));
     if (type == 14) {
